@@ -1,28 +1,24 @@
-use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
-use std::io;
+use std::net::{ ToSocketAddrs,SocketAddr};
+use std::io::{self, Error};
+use std::vec::IntoIter;
 
 
 fn main() {
-    let message : &str = "Enter url eg. https://google.com";
-    println!("{}",message);
-    url_to_addr("https://google.com",message);
-
+    // Takes in a url in the form of domain.zone eg. google.com
+    let _ = make_dns_request("google.com");
 }
 
-fn url_to_addr (url : &str, message : &str) -> Ipv4Addr {
 
-let addr = Ipv4Addr::UNSPECIFIED;
+fn make_dns_request (url_str : &str) -> io::Result<()>
+{
+    let url_str: String = format!("{}:80",url_str);
+    //stores result from the to_socket_addrs function
+    let q_result: Result<IntoIter<SocketAddr>,Error>= url_str.to_socket_addrs();
 
-if url.starts_with("https://") == false {
-    println!("Error {} ", message);
-}
-
-else  if url.contains(".") == false {
-    println!("Error {} ", message);
-}
-
-else {
-    println!("Good boy");
-}
-return addr;
+    let q_result:IntoIter<SocketAddr> = match q_result {
+        Ok(iter) => iter,
+        Err(error) => panic!("Error making request: {:?}",error),
+    };
+    
+    return Ok(());
 }
