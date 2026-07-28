@@ -5,11 +5,18 @@ use std::vec::IntoIter;
 
 fn main() {
     // Takes in a url in the form of domain.zone eg. google.com
-    let _ = make_dns_request("google.com");
+     match make_dns_request("google.com") {
+        Ok(urls) => {
+            for addr in urls {
+                println!("{}", addr);
+            }
+        }
+        Err(e) => eprintln!("Error resolving DNS: {}", e),
+    }
 }
 
 
-fn make_dns_request (url_str : &str) -> io::Result<()>
+fn make_dns_request (url_str : &str) -> io::Result<IntoIter<SocketAddr>>
 {
     let url_str: String = format!("{}:80",url_str);
     //stores result from the to_socket_addrs function
@@ -17,8 +24,9 @@ fn make_dns_request (url_str : &str) -> io::Result<()>
 
     let q_result:IntoIter<SocketAddr> = match q_result {
         Ok(iter) => iter,
-        Err(error) => panic!("Error making request: {:?}",error),
+        Err(error) => return Err(error),
     };
-    
-    return Ok(());
+
+    let addrs =q_result;
+    return Ok(addrs);
 }
